@@ -1,229 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weekly Workout Tracker</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      background: #f4f4f4;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    h1 {
-      margin: 0;
-    }
-    .reset-btn {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    .reset-btn:hover {
-      background: #c0392b;
-    }
-    h2 {
-      margin-top: 1.5rem;
-      color: #2c3e50;
-    }
-    .day {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .exercise {
-      display: flex;
-      align-items: center;
-      margin: 0.25rem 0;
-    }
-    .exercise label {
-      display: flex;
-      align-items: center;
-      flex: 1;
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 3px;
-      transition: background-color 0.2s;
-    }
-    .exercise label:hover {
-      background-color: #f8f9fa;
-    }
-    .exercise input[type="checkbox"] {
-      margin-right: 0.5rem;
-    }
-    .sets {
-      color: #555;
-      font-size: 0.9rem;
-      margin-left: auto;
-    }
-    .exercise-name {
-      flex: 1;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>🏋️ Weekly Workout Tracker</h1>
-    <button class="reset-btn" onclick="resetProgress()">Reset Progress</button>
-  </div>
-
-  <div id="workout-container"></div>
-
-  <script>
-    // Workout configuration object
-    const workoutConfig = {
-      "Monday – Push A": [
-        { name: "Normal Push-ups", sets: "2 sets to failure" },
-        { name: "Diamond Push-ups", sets: "2 sets to failure" },
-        { name: "Decline Push-ups", sets: "2 sets to failure" },
-        { name: "Incline Push-ups", sets: "2 sets to failure" },
-        { name: "Pike Push-ups", sets: "2 sets to failure" },
-        { name: "Wide Push-ups", sets: "2 sets to failure" }
-      ],
-      "Tuesday – Pull A": [
-        { name: "Pull-ups", sets: "4 sets to failure" },
-        { name: "Towel Rows", sets: "3 sets to failure" },
-        { name: "Supermans", sets: "3 sets to failure" },
-        { name: "Towel Face Pulls", sets: "3 sets to failure" },
-        { name: "Pull-up Hold", sets: "3 sets to failure" }
-      ],
-      "Wednesday – Leg A": [
-        { name: "Free Squats", sets: "3 sets x 25 reps" },
-        { name: "Pistol Squats", sets: "3 sets to failure" },
-        { name: "Bulgarian Split Squats", sets: "3 sets to failure" },
-        { name: "Glute Bridges", sets: "3 sets to failure" },
-        { name: "Wall Sit", sets: "3 sets 30-60 sec" },
-        { name: "Calf Raises", sets: "3 sets x 20-30 reps" }
-      ],
-      "Thursday – Push B": [
-        { name: "Normal Push-ups", sets: "2 sets to failure" },
-        { name: "Diamond Push-ups", sets: "2 sets to failure" },
-        { name: "Decline Push-ups", sets: "2 sets to failure" },
-        { name: "Archer Push-ups", sets: "2 sets to failure" },
-        { name: "Pseudo Planche Push-ups", sets: "2 sets to failure" },
-        { name: "Clap Push-ups", sets: "2 sets to failure" }
-      ],
-      "Friday – Pull B": [
-        { name: "Pull-ups", sets: "4 sets to failure" },
-        { name: "Towel Rows", sets: "3 sets to failure" },
-        { name: "Aquamans", sets: "3 sets to failure" },
-        { name: "Negative Pull-ups", sets: "3 sets to failure" }
-      ],
-      "Saturday – Leg B": [
-        { name: "Free Squats", sets: "3 sets x 25 reps" },
-        { name: "Pistol Squats", sets: "3 sets to failure" },
-        { name: "Bulgarian Split Squats", sets: "3 sets to failure" },
-        { name: "Jump Squats", sets: "3 sets x 15-20 reps" },
-        { name: "Lateral Lunges", sets: "3 sets x 10-15 reps each leg" },
-        { name: "Elevated Calf Raises", sets: "3 sets x 20-30 reps" }
-      ]
-    };
-
-    // Function to load progress from localStorage
-    function loadProgress() {
-      const saved = localStorage.getItem('workoutProgress');
-      return saved ? JSON.parse(saved) : {};
-    }
-
-    // Function to save progress to localStorage
-    function saveProgress(progress) {
-      localStorage.setItem('workoutProgress', JSON.stringify(progress));
-    }
-
-    // Function to create a unique ID for each exercise
-    function createExerciseId(day, exerciseName) {
-      return `${day.replace(/\s+/g, '_').toLowerCase()}_${exerciseName.replace(/\s+/g, '_').toLowerCase()}`;
-    }
-
-    // Function to handle checkbox changes
-    function handleCheckboxChange(exerciseId, isChecked) {
-      const progress = loadProgress();
-      if (isChecked) {
-        progress[exerciseId] = true;
-      } else {
-        delete progress[exerciseId];
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Workout Tracker</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 1rem;
+        background: #f4f4f4;
       }
-      saveProgress(progress);
-    }
-
-    // Function to reset all progress
-    function resetProgress() {
-      if (confirm('Are you sure you want to reset all workout progress?')) {
-        localStorage.removeItem('workoutProgress');
-        
-        // Uncheck all checkboxes
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-          checkbox.checked = false;
-        });
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
       }
-    }
+      h1 {
+        margin: 0;
+      }
+      .reset-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+      .reset-btn:hover {
+        background: #c0392b;
+      }
+      h2 {
+        margin-top: 1.5rem;
+        color: #2c3e50;
+      }
+      .day {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .exercise {
+        display: flex;
+        align-items: center;
+        margin: 0.25rem 0;
+      }
+      .exercise label {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+      }
+      .exercise label:hover {
+        background-color: #f8f9fa;
+      }
+      .exercise input[type="checkbox"] {
+        margin-right: 0.5rem;
+      }
+      .sets {
+        color: #555;
+        font-size: 0.9rem;
+        margin-left: auto;
+      }
+      .exercise-name {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>🏋️ Weekly Workout Tracker</h1>
+      <button class="reset-btn" onclick="resetProgress()">
+        Reset Progress
+      </button>
+    </div>
 
-    // Function to render the workout tracker
-    function renderWorkoutTracker() {
-      const container = document.getElementById('workout-container');
-      const progress = loadProgress();
-      
-      container.innerHTML = '';
+    <div id="workout-container"></div>
 
-      Object.entries(workoutConfig).forEach(([day, exercises]) => {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day';
+    <script>
+      // Workout configuration object
+      const workoutConfig = {
+        "Monday – Push A": [
+          { name: "Regular Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Regular Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Diamond Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Decline Push-ups", sets: "3 sets x (8-12) reps" },
+          { name: "Pike Holds", sets: "3 sets x 30 sec" },
+        ],
+        "Tuesday – Pull A": [
+          { name: "Pull-ups", sets: "4 sets x 5 reps" },
+          { name: "Supermans", sets: "3 sets to failure" },
+          { name: "Aquamans", sets: "3 sets to failure" },
+          { name: "Towel Face Pulls", sets: "3 sets to failure" },
+          { name: "Pull-up Hold", sets: "3 sets to failure" },
+          { name: "Forearm workout", sets: "3 sets to failure" },
+        ],
+        "Wednesday – Leg A": [
+          { name: "Free Squats", sets: "3 sets x 25 reps" },
+          { name: "Bulgarian Split Squats", sets: "3 sets x 15 reps" },
+          { name: "Glute Bridges", sets: "3 sets x 45 sec" },
+          { name: "Wall Sit", sets: "3 sets 30-60 sec" },
+          { name: "Calf Raises", sets: "3 sets x 20-30 reps" },
+          { name: "Plank", sets: "3 sets x 40 sec" },
+          { name: "Leg raise", sets: "3 sets to failure" },
+        ],
+        "Thursday – Push B": [
+          { name: "Normal Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Normal Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Diamond Push-ups", sets: "3 sets x 12 reps" },
+          { name: "Archer Push-ups", sets: "2 sets to failure" },
+          { name: "Decline Push-ups", sets: "3 sets x (8-12) reps" },
+        ],
+        "Friday – Pull B": [
+          { name: "Pull-ups", sets: "4 sets x 5 reps" },
+          { name: "Supermans", sets: "3 sets to failure" },
+          { name: "Aquamans", sets: "3 sets to failure" },
+          { name: "Towel Face Pulls", sets: "3 sets to failure" },
+          { name: "Pull-up Hold", sets: "3 sets to failure" },
+          { name: "Forearm workout", sets: "3 sets to failure" },
+        ],
+        "Saturday – Leg B": [
+          { name: "Free Squats", sets: "3 sets x 25 reps" },
+          { name: "Bulgarian Split Squats", sets: "3 sets x 15 reps" },
+          { name: "Glute Bridges", sets: "3 sets x 45 sec" },
+          { name: "Wall Sit", sets: "3 sets 30-60 sec" },
+          { name: "Calf Raises", sets: "3 sets x 20-30 reps" },
+          { name: "Side Plank", sets: "3 sets x 30 sec each" },
+          { name: "Russian twist", sets: "3 sets to failure" },
+        ],
+      };
 
-        const dayTitle = document.createElement('h2');
-        dayTitle.textContent = day;
-        dayDiv.appendChild(dayTitle);
+      // Function to load progress from localStorage
+      function loadProgress() {
+        const saved = localStorage.getItem("workoutProgress");
+        return saved ? JSON.parse(saved) : {};
+      }
 
-        exercises.forEach(exercise => {
-          const exerciseDiv = document.createElement('div');
-          exerciseDiv.className = 'exercise';
+      // Function to save progress to localStorage
+      function saveProgress(progress) {
+        localStorage.setItem("workoutProgress", JSON.stringify(progress));
+      }
 
-          const exerciseId = createExerciseId(day, exercise.name);
-          
-          const label = document.createElement('label');
-          label.setAttribute('for', exerciseId);
+      // Function to create a unique ID for each exercise
+      function createExerciseId(day, exerciseName) {
+        return `${day.replace(/\s+/g, "_").toLowerCase()}_${exerciseName
+          .replace(/\s+/g, "_")
+          .toLowerCase()}`;
+      }
 
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.id = exerciseId;
-          checkbox.checked = progress[exerciseId] || false;
-          checkbox.addEventListener('change', (e) => {
-            handleCheckboxChange(exerciseId, e.target.checked);
+      // Function to handle checkbox changes
+      function handleCheckboxChange(exerciseId, isChecked) {
+        const progress = loadProgress();
+        if (isChecked) {
+          progress[exerciseId] = true;
+        } else {
+          delete progress[exerciseId];
+        }
+        saveProgress(progress);
+      }
+
+      // Function to reset all progress
+      function resetProgress() {
+        if (confirm("Are you sure you want to reset all workout progress?")) {
+          localStorage.removeItem("workoutProgress");
+
+          // Uncheck all checkboxes
+          const checkboxes = document.querySelectorAll(
+            'input[type="checkbox"]'
+          );
+          checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+          });
+        }
+      }
+
+      // Function to render the workout tracker
+      function renderWorkoutTracker() {
+        const container = document.getElementById("workout-container");
+        const progress = loadProgress();
+
+        container.innerHTML = "";
+
+        Object.entries(workoutConfig).forEach(([day, exercises]) => {
+          const dayDiv = document.createElement("div");
+          dayDiv.className = "day";
+
+          const dayTitle = document.createElement("h2");
+          dayTitle.textContent = day;
+          dayDiv.appendChild(dayTitle);
+
+          exercises.forEach((exercise) => {
+            const exerciseDiv = document.createElement("div");
+            exerciseDiv.className = "exercise";
+
+            const exerciseId = createExerciseId(day, exercise.name);
+
+            const label = document.createElement("label");
+            label.setAttribute("for", exerciseId);
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = exerciseId;
+            checkbox.checked = progress[exerciseId] || false;
+            checkbox.addEventListener("change", (e) => {
+              handleCheckboxChange(exerciseId, e.target.checked);
+            });
+
+            const exerciseName = document.createElement("span");
+            exerciseName.className = "exercise-name";
+            exerciseName.textContent = exercise.name;
+
+            const setsInfo = document.createElement("span");
+            setsInfo.className = "sets";
+            setsInfo.textContent = exercise.sets;
+
+            label.appendChild(checkbox);
+            label.appendChild(exerciseName);
+            label.appendChild(setsInfo);
+
+            exerciseDiv.appendChild(label);
+            dayDiv.appendChild(exerciseDiv);
           });
 
-          const exerciseName = document.createElement('span');
-          exerciseName.className = 'exercise-name';
-          exerciseName.textContent = exercise.name;
-
-          const setsInfo = document.createElement('span');
-          setsInfo.className = 'sets';
-          setsInfo.textContent = exercise.sets;
-
-          label.appendChild(checkbox);
-          label.appendChild(exerciseName);
-          label.appendChild(setsInfo);
-          
-          exerciseDiv.appendChild(label);
-          dayDiv.appendChild(exerciseDiv);
+          container.appendChild(dayDiv);
         });
+      }
 
-        container.appendChild(dayDiv);
-      });
-    }
-
-    // Initialize the workout tracker when the page loads
-    document.addEventListener('DOMContentLoaded', renderWorkoutTracker);
-  </script>
-</body>
+      // Initialize the workout tracker when the page loads
+      document.addEventListener("DOMContentLoaded", renderWorkoutTracker);
+    </script>
+  </body>
 </html>
